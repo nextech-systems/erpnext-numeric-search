@@ -1,0 +1,1 @@
+erpnext_numeric_search.patches.v14_001_enable_numeric_global_search

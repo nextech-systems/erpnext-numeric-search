@@ -1,0 +1,56 @@
+import frappe
+
+# Map of DocType -> list of fieldnames to index in Global Search
+TARGETS = {
+    "Sales Invoice": ["grand_total", "outstanding_amount", "rounded_total"],
+    "Purchase Invoice": ["grand_total", "outstanding_amount", "rounded_total"],
+    "Sales Order": ["grand_total", "rounded_total"],
+    "Purchase Order": ["grand_total", "rounded_total"],
+    "Payment Entry": ["paid_amount", "received_amount"],
+    "Journal Entry": ["total_debit", "total_credit"],
+    "GL Entry": ["debit", "credit"],
+}
+
+def make_property_setter(dt, fieldname):
+    # Creates/updates Property Setter to set in_global_search = 1 for a field
+    if not frappe.db.exists(
+        "Property Setter",
+        {"doc_type": dt, "field_name": fieldname, "property": "in_global_search"},
+    ):
+        ps = frappe.get_doc({
+            "doctype": "Property Setter",
+            "doc_type": dt,
+            "doctype_or_field": "DocField",
+            "field_name": fieldname,
+            "property": "in_global_search",
+            "value": "1",
+            "property_type": "Check",
+        })
+        ps.insert(ignore_permissions=True)
+    else:
+        frappe.db.set_value(
+            "Property Setter",
+            {"doc_type": dt, "field_name": fieldname, "property": "in_global_search"},
+            "value",
+            "1",
+        )
+
+def execute():
+    # Create property setters
+    for dt, fields in TARGETS.items():
+        for fn in fields:
+            try:
+                make_property_setter(dt, fn)
+            except Exception:
+                frappe.log_error(f"Could not set in_global_search for {dt}.{fn}")
+
+    frappe.clear_cache()
+
+    # Rebuild global search index for affected doctypes
+    # (queueing is safe; alternatively, run bench reindex after migrate)
+    from frappe.utils.global_search import rebuild_for_doctype
+    for dt in TARGETS.keys():
+        try:
+            rebuild_for_doctype(dt)
+        except Exception:
+            frappe.log_error(f"Failed to rebuild global search for {dt}")
