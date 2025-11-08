@@ -116,5 +116,3 @@ MIT
 
 
 ---
-
-If you want, I can also add a tiny **Settings page** stub to the app (so you can toggle doctypes/fiel
