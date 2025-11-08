@@ -116,3 +116,14 @@ MIT
 
 
 ---
+
+If you want, I can also add a tiny **Settings page** stub to the app (so you can toggle doctypes/fiel
+=======
+## Global Numeric Search
+
+erpnext_numeric_search
+
+#### License
+
+MIT
+>>>>>>> 04342ad (feat: Initialize App)
