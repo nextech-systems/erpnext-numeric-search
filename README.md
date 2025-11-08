@@ -1,4 +1,3 @@
-📄 README.md (copy-paste)
 # ERPNext Numeric Search
 
 Make **numeric and currency fields** searchable via the **Global Search** in ERPNext/Frappe v14.  
